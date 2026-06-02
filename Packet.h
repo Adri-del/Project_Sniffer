@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 // Clase que representa un paquete de red capturado
 // Almacena el encabezado IP
@@ -9,9 +10,16 @@
 // Almacena el contenidobruto del paquete 
 class Packet {
     private:
-        // Informacion general del paquete IP
-        int id;
 
+        int id;
+        int ip_id;
+
+        // Informacion de la capa de enlace
+        std::string link_type;
+        std::string mac_src;
+        std::string mac_dst;
+
+        // Informacion de la capa de red (Protocolo IP)
         std::string src_ip;
         std::string dst_ip;
 
@@ -40,6 +48,10 @@ class Packet {
         Packet() = default;
         Packet(const Packet& obj) {
             id = obj.id;
+            ip_id = obj.ip_id;
+            link_type = obj.link_type;
+            mac_src = obj.mac_src;
+            mac_dst =obj.mac_dst;
             src_ip = obj.src_ip;
             dst_ip = obj.dst_ip;
             tos = obj.tos;
@@ -56,7 +68,11 @@ class Packet {
 
         Packet& operator=(const Packet& obj) {
             if(this != &obj) {
-                id = obj.id;
+                id = obj.id; 
+                ip_id = obj.ip_id;
+                link_type = obj.link_type;
+                mac_src = obj.mac_src;
+                mac_dst =obj.mac_dst;
                 src_ip = obj.src_ip;
                 dst_ip = obj.dst_ip;
                 tos = obj.tos;
@@ -75,7 +91,15 @@ class Packet {
 
         // Exporta la informacion del paquete en formato CSV
         void guardarPaquete(std::ofstream& outfile) const {
+            std::string raw;
+            for(unsigned char byte : rawData) {
+                raw += (byte < 16 ? "0" : "") + std::to_string(byte);
+            }
             outfile << id << ","
+                    << ip_id << ","
+                    << link_type << ","
+                    << mac_src << ","
+                    << mac_dst << ","
                     << src_ip << ","
                     << dst_ip << ","
                     << tos << ","
@@ -86,11 +110,12 @@ class Packet {
                     << dst_port << ","
                     << icmp_type << ","
                     << icmp_code << ","
-                    << flags << "\n";
+                    << flags << ","
+                    << raw << "\n";
         }
 
         // Muestra la informacion del paquete
-        void mostrarPaquete() {
+        void mostrarResumen() {
             // Mostrar informacion IP
             std::cout << "======================================================================\n";
             std::cout << "ID: " << id;
@@ -122,8 +147,89 @@ class Packet {
             std::cout << std::endl;
         }
 
+        // Mostrar la informacion detallada del paquete
+        void mostrarDetalle() {
+            std::cout << "\n================  AREA 2  =======================\n";
+
+            std::cout << "\nID             : " << id << "\n";
+
+            std::cout << "\nCAPA FISICA\n";
+            std::cout << "Tamano paquete : " << len << " bytes\n";
+
+
+            std::cout << "\nCAPA DE ENLACE\n";
+            std::cout << "Tipo de enlace : " << link_type << "\n";
+            if(link_type == "Ethernet") {
+                std::cout << "MAC Fuente     : " << mac_src << "\n";
+                std::cout << "MAC Destino    : " << mac_dst << "\n";
+            }
+
+            
+            std::cout << "\nCAPA DE RED\n";
+            std::cout << "Identificador  : " << ip_id << "\n";
+            std::cout << "IP Fuente      : " << src_ip << "\n";
+            std::cout << "IP Destino     : " << dst_ip << "\n";
+            std::cout << "TTL            : " << ttl << "\n";
+            std::cout << "TOS            : 0x" << std::hex << tos << std::dec << "\n";
+
+            
+            std::cout << "\nCAPA DE TRANSPORTE\n";
+            std::cout << "Protocolo      : " << protocol << "\n";
+            if (src_port != -1 && dst_port != -1) {
+            std::cout << "Puerto Fuente  : " << src_port << "\n";
+            std::cout << "Puerto Destino : " << dst_port << "\n";
+            } else {
+            std::cout << "Puerto Fuente  : N/C\n";
+            std::cout << "Puerto Destino : N/C\n";
+            }
+            if (!flags.empty()) {
+                std::cout << "Flags      : " << flags << "\n";
+            }
+            
+            std::cout << "\nCAPA DE APLICACION\n";
+            if (icmp_type != -1 && icmp_code != -1) {
+                std::cout << "Tipo ICMP  : " << icmp_type << "\n";
+                std::cout << "ICMP code  : " << icmp_code << "\n";
+            } else {
+                std::cout << "Tipo ICMP  : N/C\n";
+                std::cout << "ICMP Code  : N/C\n";
+            }
+        }
+
+        // Mostrar el Data Raw
+        void mostrarDataRaw() {
+            std::cout << "\n============  AREA 3  ================\n";
+
+            if (rawData.empty()) {
+                std::cout << "Error al Capturar el Raw Data.\n";
+                return;
+            }
+
+            const int bytesLine = 16;
+
+            for (int i = 0; i < rawData.size(); i++) {
+
+                // offset
+                if (i % bytesLine == 0) {
+                    std::cout << "\n" << std::setw(4) << std::setfill('0') << std::hex << i << "  ";
+                }
+
+                std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)rawData[i] << " ";
+
+                if (i % bytesLine == 7) {
+                    std::cout << " ";
+                }
+            }
+
+            std::cout << std::dec;
+        }
+
         // Setters
         void setId(int id) { this->id = id; }
+        void setIP_ID(int ip_id) { this->ip_id = ip_id; }
+        void setLinkType(const std::string& link_type) { this->link_type = link_type; }
+        void setMacSrc(const std::string& mac_src) { this->mac_src = mac_src; }
+        void setMacDst(const std::string& mac_dst) { this->mac_dst = mac_dst; }
         void setSrcIp(const std::string& src_ip) { this->src_ip = src_ip; }
         void setDstIp(const std::string& dst_ip) { this->dst_ip = dst_ip; }
         void setTos(int tos) { this->tos = tos; }
@@ -139,6 +245,10 @@ class Packet {
         
         // Getters
         int getId() { return id; }
+        int getIP_ID() { return ip_id; }
+        std::string getLinkType() { return link_type; }
+        std::string getMacSrc() { return mac_src; }
+        std::string getMacDst() { return mac_dst; }
         std::string getSrcIp() { return src_ip; }
         std::string getDstIp() { return dst_ip; }
         int getTos() { return tos; }
