@@ -4,7 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/npcap-sdk/Include"
+                "C:/npcap-sdk/Include",
+                "C:/Users/chiqu/OneDrive/Desktop/Redes/Sniffer"
             ],
             "defines": [
                 "_DEBUG",
