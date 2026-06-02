@@ -1,55 +1,52 @@
-// IPv4 header structure
+#ifndef HEADERSTRUCTURES_H
+#define HEADERSTRUCTURES_H
+
+#include <cstdint>
+
+#pragma pack(push, 1)
+
+// IPv4 HEADER
 struct iphdr {
-    unsigned char ver_ihl; // Version IP (4 bits) + Internet header Length (4 bits)
-
-    unsigned char tos; // Tipo de servicio
-    unsigned short tot_len; // Longitud total del paquete IP
-
-    unsigned short id; // Indentificador del paquete, se utiliza para la fragmentacion
-    unsigned short frag_off; // Fragmentacion offset y flags de fragmentacion
-
-    unsigned char ttl; // Tiempo de vida del paquete
-    unsigned char protocol; // Protocolo encapsulado (TCP, UDP, ICMP, etc.)
-
-    unsigned short check; // Checksum del header IP
-
-    unsigned int saddr; // Direccion Ip de origen
-    unsigned int daddr; // Direccion Ip de destino
+    uint8_t  ver_ihl;     // Version (4 bits) + IHL (4 bits)
+    uint8_t  tos;         // Type of Service
+    uint16_t tot_len;     // Total Length
+    uint16_t id;          // Identification
+    uint16_t frag_off;    // Fragment offset + flags
+    uint8_t  ttl;         // Time To Live
+    uint8_t  protocol;    // Protocol (TCP=6, UDP=17, ICMP=1)
+    uint16_t check;       // Header checksum
+    uint32_t saddr;       // Source IP
+    uint32_t daddr;       // Destination IP
 };
 
-// TCP header structure
+// TCP HEADER
 struct tcphdr {
-    unsigned short source; // Puerto de origen
-    unsigned short dest; // Puerto de destino
-
-    unsigned int seq; // Numero de secuencia del paquete TCP
-    unsigned int ack_seq; // Numero de confirmacion del paquete TCP (ACK)
-
-    unsigned char reserved : 4; // Bits reservados
-    unsigned char doff : 4; // Data Offset (Longitud del header TCP)
-
-    unsigned char flags; // Flags TCP (SYN, ACK, FIN, RST, etc.)
-
-    unsigned short window; // Tamaño de la ventana TCP
-    unsigned short check; // Checksum del header TCP
-    unsigned short urg_ptr; // Puntero urgente (si el flag URG esta activo)
+    uint16_t source;       // Source port
+    uint16_t dest;         // Destination port
+    uint32_t seq;          // Sequence number
+    uint32_t ack_seq;      // Acknowledgment number
+    uint8_t  doff_reserved;// Data offset (4 bits) + reserved (4 bits)
+    uint8_t  flags;        // Flags (SYN, ACK, FIN, RST, etc.)
+    uint16_t window;       // Window size
+    uint16_t check;        // Checksum
+    uint16_t urg_ptr;      // Urgent pointer
 };
 
-//UDP header structure
+// UDP HEADER
 struct udphdr {
-
-    unsigned short source; // Puerto de origen
-    unsigned short dest; // Puerto de destino
-
-    unsigned short len; // Longitud total del segmento UDP (header + data)
-    unsigned short check; // Checksum UDP
+    uint16_t source;      // Source port
+    uint16_t dest;        // Destination port
+    uint16_t len;         // Length
+    uint16_t check;       // Checksum
 };
 
-// ICMP header structure
+// ICMP HEADER
 struct icmphdr {
-
-    unsigned char type; // Tipo de mensaje ICMP (Echo Request, Echo Reply, Destination Unreachable, etc.)
-    unsigned char code; // Codigo especifico del mensaje ICMP 
-
-    unsigned short checksum; // Checksum del mensaje ICMP
+    uint8_t  type;        // ICMP type
+    uint8_t  code;        // ICMP code
+    uint16_t checksum;    // Checksum
 };
+
+#pragma pack(pop)
+
+#endif // HEADERSTRUCTURES_H

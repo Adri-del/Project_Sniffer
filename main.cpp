@@ -1,22 +1,12 @@
-#include <iostream>
-#include "Sniffer.h"
+#include <QApplication>
+#include "mainwindow.h"
 
-int main() {
-    char option;
-    Sniffer sniffer;
-    do{
-        std::cout << "\n===MENU PRINCIPAL===\n";
-        std::cout << "1.Iniciar captura\n";
-        std::cout << "2.Salir\n";
-        std::cout << "Seleccione una opcion: ";
-        option = _getch();
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
 
-        switch(option) {
-            case '1': sniffer.capturar(); break;
-            case '2': std::cout << "\nSaliendo..." << std::endl; break;
-            default: std::cout << "\nOpcion no valida. Intente de nuevo." << std::endl; break;
-        }
-    }while(option != '2');
+    MainWindow w;
+    w.show();
 
-    return 0;
+    return a.exec();
 }
