@@ -8,8 +8,8 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QLabel>
+#include <QStatusBar>
 #include <QListWidget>
-#include <vector>
 
 #include "Sniffer.h"
 #include "Packet.h"
@@ -25,50 +25,46 @@ public:
 
 private:
 
-    // Packet capture engine
-    Sniffer* sniffer = nullptr;
-
-    // Threat detection module
+    Sniffer*       sniffer  = nullptr;
     ThreatDetector detector;
 
-    // Main packet table
+    // Main table
     QTableWidget* table;
 
-    // Bottom panels
-    QTextEdit* details;   // OSI layer analysis
-    QTextEdit* raw;       // Hexadecimal viewer
+    // Lower panels
+    QTextEdit*   details;   // Analysis by OSI layers
+    QTextEdit*   raw;       // Hexadecimal viewer
 
-    // Alert panel
-    QListWidget* alertList;      // Alert list
-    QLabel*      alertBadge;     // Alert counter badge
-    QPushButton* btnClearAlerts; // Clear alerts button
+    QListWidget* alertList;       // list of alerts
+    QLabel*      alertBadge;      // red counter in the tab
+    QPushButton* btnClearAlerts;  // clear alerts
     int          alertCount = 0;
 
-    // Control buttons
+    // Buttons
     QPushButton* btnStart;
     QPushButton* btnStop;
     QPushButton* btnClearFilters;
     QPushButton* btnExportCSV;
     QPushButton* btnClearCapture;
 
-    // Display filters
+    // Visual filters
     QLineEdit* filterSrcIp;
     QLineEdit* filterDstIp;
     QLineEdit* filterSrcPort;
     QLineEdit* filterDstPort;
     QComboBox* filterProtocol;
 
-    // BPF capture filter
+    // Filter BPF
     QLineEdit* filterBPF;
 
-    // Captured packet storage
+    // Data
     std::vector<Packet> packetList;
     std::vector<Packet> displayedList;
 
-    // Status bar label
+    // Status bar
     QLabel* statusLabel;
 
-    // Helper methods
+    // Auxiliary methods
     void applyFilters();
     void updateTable();
     void exportToCSV();
