@@ -8,10 +8,12 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QLabel>
-#include <QStatusBar>
+#include <QListWidget>
+#include <vector>
 
 #include "Sniffer.h"
 #include "Packet.h"
+#include "ThreatDetector.h"
 
 class MainWindow : public QMainWindow
 {
@@ -23,46 +25,57 @@ public:
 
 private:
 
+    // Packet capture engine
     Sniffer* sniffer = nullptr;
 
-    // Tabla principal
+    // Threat detection module
+    ThreatDetector detector;
+
+    // Main packet table
     QTableWidget* table;
 
-    // Paneles inferiores
-    QTextEdit* details;   // Analisis por capas OSI
-    QTextEdit* raw;       // Visor hexadecimal
+    // Bottom panels
+    QTextEdit* details;   // OSI layer analysis
+    QTextEdit* raw;       // Hexadecimal viewer
 
-    // Buttons
+    // Alert panel
+    QListWidget* alertList;      // Alert list
+    QLabel*      alertBadge;     // Alert counter badge
+    QPushButton* btnClearAlerts; // Clear alerts button
+    int          alertCount = 0;
+
+    // Control buttons
     QPushButton* btnStart;
     QPushButton* btnStop;
     QPushButton* btnClearFilters;
     QPushButton* btnExportCSV;
     QPushButton* btnClearCapture;
 
-    // Filtros visuales
+    // Display filters
     QLineEdit* filterSrcIp;
     QLineEdit* filterDstIp;
     QLineEdit* filterSrcPort;
     QLineEdit* filterDstPort;
     QComboBox* filterProtocol;
 
-    // Filtro BPF
+    // BPF capture filter
     QLineEdit* filterBPF;
 
-    // Datos
-    std::vector<Packet> packetList;    // Todos los paquetes capturados
-    std::vector<Packet> displayedList; // Los que pasan el filtro visual
+    // Captured packet storage
+    std::vector<Packet> packetList;
+    std::vector<Packet> displayedList;
 
-    // Status bar
+    // Status bar label
     QLabel* statusLabel;
 
-    // Metodos auxiliares
+    // Helper methods
     void applyFilters();
     void updateTable();
     void exportToCSV();
     void updateStatusBar();
     void colorRow(int row, const std::string& protocol);
     void appendRow(const Packet& pkt);
+    void addAlert(const Alert& alert);
 };
 
 #endif
