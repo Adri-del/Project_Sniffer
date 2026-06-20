@@ -1,6 +1,6 @@
 build/
 output/
-.gtcreator/
+.qtcreator/
 .vscode/
 
 *.pro.user
