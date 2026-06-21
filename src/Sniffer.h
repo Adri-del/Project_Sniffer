@@ -31,6 +31,7 @@ private:
     pcap_t* capDev = nullptr;
     int link_hdr_length = 0;
     std::atomic<bool> capturing { false };
+    std::atomic<int> contador;
 
 public:
     // Callback que MainWindow conecta para recibir cada paquete capturado
@@ -56,6 +57,7 @@ public:
             WSACleanup();
             throw std::runtime_error(error_buffer);
         }
+        contador = 1;
     }
 
     ~Sniffer() {
@@ -133,7 +135,7 @@ private:
 
         // Rellenar campos IP del paquete
         Packet pkt;
-        pkt.setId(ntohs(ip->id));
+        pkt.setId(self->contador);
         pkt.setSrcIp(src_ip);
         pkt.setDstIp(dst_ip);
         pkt.setTos(ip->tos);
@@ -185,6 +187,8 @@ private:
         // Enviar paquete a MainWindow via callback
         if (self->onPacketCaptured)
             self->onPacketCaptured(pkt);
+        pkt.mostrarPaquete();
+        self->contador++;
     }
 };
 

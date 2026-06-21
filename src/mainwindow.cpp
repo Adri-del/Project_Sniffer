@@ -20,7 +20,7 @@
 //  Constructor
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
-    setWindowTitle("Packet Sniffer — Redes I");
+    setWindowTitle("Packet Sniffer — Equipo 5");
     resize(1500, 900);
 
     // Tema oscuro
@@ -145,13 +145,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     table->verticalHeader()->setVisible(false);
     table->horizontalHeader()->setStretchLastSection(true);
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-    // Anchos iniciales razonables
     table->setColumnWidth(0, 70);   // ID
-    table->setColumnWidth(1, 140);  // SRC IP
-    table->setColumnWidth(2, 140);  // DST IP
-    table->setColumnWidth(3, 90);   // SRC PORT
-    table->setColumnWidth(4, 90);   // DST PORT
-    table->setColumnWidth(5, 90);   // PROTOCOLO
+    table->setColumnWidth(1, 260);  // SRC IP
+    table->setColumnWidth(2, 260);  // DST IP
+    table->setColumnWidth(3, 260);   // SRC PORT
+    table->setColumnWidth(4, 260);   // DST PORT
+    table->setColumnWidth(5, 260);   // PROTOCOLO
 
     // Panel inferior
     details = new QTextEdit;

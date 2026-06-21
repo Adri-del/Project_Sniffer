@@ -14,5 +14,5 @@ HEADERS += \
     src\ThreatDetector.h \
     src\mainwindow.h
 
-INCLUDEPATH += $$PWD/npcap-sdk/Include
-LIBS += -L$$PWD/npcap-sdk/Lib/x64 -lwpcap -lPacket -lws2_32
+INCLUDEPATH += $$PWD/Sniffer-Installer/npcap-sdk/Include
+LIBS += -L$$PWD/Sniffer-Installer/npcap-sdk/Lib/x64 -lwpcap -lPacket -lws2_32
