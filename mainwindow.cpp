@@ -21,6 +21,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setWindowTitle("Packet Sniffer - Computer Networks I");
     resize(1500, 900);
 
+    //Prueba del tamaño de la estructura
+    #include <iostream>
+    std::cout << "--- PRUEBA DE NETWORKS ---" << std::endl;
+    std::cout << "Tamano de iphdr: " << sizeof(iphdr) << " bytes" << std::endl;
+    std::cout << "--------------------------" << std::endl;
+
     // Dark Them
     setStyleSheet(R"(
         QMainWindow          { background-color: #1e1e1e; color: #ffffff; }
