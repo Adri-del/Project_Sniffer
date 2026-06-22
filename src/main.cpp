@@ -1,7 +1,5 @@
 #include <QApplication>
 #include "mainwindow.h"
-#include "HeaderStructures.h"
-#include <iostream>
 
 int main(int argc, char *argv[])
 {
