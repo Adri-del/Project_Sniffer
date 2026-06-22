@@ -268,6 +268,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
             QTimer::singleShot(0, this, &QWidget::close);
         }
 
+        // Conect ThreatDetector
+        detector.onAlert = [this](const Alert& alert) {
+            QMetaObject::invokeMethod(this, [this, alert]() {
+                addAlert(alert);
+            });
+        };
+
         //  Conexión del callback: Sniffer → MainWindow
         if (sniffer) {
             sniffer->onPacketCaptured = [this](const Packet& pkt) {
@@ -276,6 +283,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
                 // siempre desde el hilo principal de Qt.
                 QMetaObject::invokeMethod(this, [this, pkt]() {
                     packetList.push_back(pkt);
+                    detector.analyze(pkt);
 
                     // Filtro visual: si pasa, añadirlo directamente a la tabla
                     std::string fSrcIp   = filterSrcIp->text().toStdString();
