@@ -1,6 +1,4 @@
 
-#include "mainwindow.h"
-
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSplitter>
@@ -12,9 +10,11 @@
 #include <QScrollBar>
 #include <QStyle>
 #include <QTimer>
+#include <QFileDialog>
 #include <QStandardPaths>
 #include <QTabWidget>
 #include <QListWidgetItem>
+#include "mainwindow.h"
 
 #include <thread>
 #include <fstream>
@@ -24,12 +24,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     setWindowTitle("Packet Sniffer — Equipo 5");
     resize(1500, 900);
 
-    //Prueba del tamaño de la estructura
-    #include <iostream>
-    std::cout << "--- PRUEBA DE NETWORKS ---" << std::endl;
-    std::cout << "Tamano de iphdr: " << sizeof(iphdr) << " bytes" << std::endl;
-    std::cout << "--------------------------" << std::endl;
-
+    // Tema oscuro
     setStyleSheet(R"(
         QMainWindow          { background-color: #1e1e1e; color: #ffffff; }
         QLabel               { color: #e0e0e0; }
@@ -74,6 +69,27 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
         QScrollBar:vertical   { background: #2a2a2a; width: 10px; }
         QScrollBar::handle:vertical { background: #555; border-radius: 4px; }
         QStatusBar            { background-color: #252525; color: #aaa; }
+        QTabWidget::pane  { border: 1px solid #555; background: #1e1e1e; }
+        
+        QTabBar::tab {
+            background: #2e2e2e; color: #ccc;
+            padding: 6px 18px;
+            border: 1px solid #555;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+        }
+        QTabBar::tab:selected { background: #3a3a3a; color: #fff; }
+        QListWidget {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-size: 13px;
+            border: 1px solid #444;
+        }
+        QListWidget::item {
+            padding: 8px 12px;
+            border-bottom: 1px solid #2e2e2e;
+        }
+        QListWidget::item:selected { background-color: #2a3a4a; }  
     )");
 
     QWidget*     central    = new QWidget;
@@ -101,7 +117,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     flVisual->addWidget(new QLabel("Src Port:")); flVisual->addWidget(filterSrcPort);
     flVisual->addWidget(new QLabel("Dst Port:")); flVisual->addWidget(filterDstPort);
     flVisual->addWidget(new QLabel("Protocolo:")); flVisual->addWidget(filterProtocol);
-
     flVisual->addSpacing(12);
     flVisual->addWidget(btnClearFilters);
     flVisual->addWidget(btnClearCapture);
@@ -110,7 +125,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     QHBoxLayout* flCapture = new QHBoxLayout(fgCapture);
 
     filterBPF = new QLineEdit;
-    filterBPF->setPlaceholderText("Filtro BPF opcional  (ej: tcp and port 80");
+    filterBPF->setPlaceholderText("Filtro BPF opcional  (ej: tcp && port 80");
     filterBPF->setMinimumWidth(350);
 
     btnStart     = new QPushButton("INICIAR CAPTURA");
@@ -133,7 +148,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     btnStop->setEnabled(false);
 
     flCapture->addWidget(new QLabel("Filtro BPF:"));
-
     flCapture->addWidget(filterBPF, 1);
     flCapture->addSpacing(12);
     flCapture->addWidget(btnStart);
@@ -145,7 +159,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     table->setColumnCount(7);
     table->setHorizontalHeaderLabels(
         {"ID", "SRC IP", "DST IP", "SRC PORT", "DST PORT", "PROTOCOLO", "FLAGS"});
-
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -153,7 +166,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     table->verticalHeader()->setVisible(false);
     table->horizontalHeader()->setStretchLastSection(true);
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-
     table->setColumnWidth(0, 70);   // ID
     table->setColumnWidth(1, 260);  // SRC IP
     table->setColumnWidth(2, 260);  // DST IP
@@ -171,7 +183,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     raw->setReadOnly(true);
     raw->setFont(QFont("Consolas", 11));
 
-    // Alert Panel
+    // Panel de Alertas
     QWidget*     alertPanel  = new QWidget;
     QVBoxLayout* alertLayout = new QVBoxLayout(alertPanel);
     alertLayout->setContentsMargins(0, 0, 0, 0);
@@ -180,7 +192,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     // Panel Header
     QHBoxLayout* alertHeader = new QHBoxLayout;
 
-    QLabel* alertTitle = new QLabel("SECURITY ALERTS");
+    QLabel* alertTitle = new QLabel("ALERTAS DE SEGURIDAD");
     alertTitle->setStyleSheet("color:#ff6b6b; font-weight:bold; font-size:13px;");
 
     alertBadge = new QLabel("0");
@@ -190,7 +202,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
         "background-color:#c42b1c; color:white; font-weight:bold;"
         "border-radius:13px; padding: 0 6px;");
 
-    btnClearAlerts = new QPushButton("Clear alerts");
+    btnClearAlerts = new QPushButton("Liampiar Alertas");
     btnClearAlerts->setStyleSheet(
         "background-color:#444; color:#ccc; padding:4px 12px;"
         "border-radius:4px; font-size:11px;");
@@ -209,8 +221,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
     QTabWidget* tabs = new QTabWidget;
     tabs->addTab(details,    "Detalles");
-    tabs->addTab(raw,        "Datos Brutos (Hex)");
-    tabs->addTab(alertPanel, "Alertas");
+    tabs->addTab(raw,        "Datos Brutos(Hex)");
+    tabs->addTab(alertPanel, "🚨  Alertas");
 
     // Splitter principal
     QSplitter* mainSplitter = new QSplitter(Qt::Vertical);
@@ -245,7 +257,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
         try {
             sniffer = new Sniffer();
             statusLabel->setText(
-                QString("Interfaz: %1  •  Paquetes: 0  •  Alerts: 0")
+                QString("Interfaz: %1  •  Paquetes: 0 •  Alertas: 0")
                     .arg(QString::fromStdString(sniffer->getDevice())));
         } catch (const std::exception& e) {
             QMessageBox::critical(
@@ -256,12 +268,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
             QTimer::singleShot(0, this, &QWidget::close);
         }
 
-        detector.onAlert = [this](const Alert& alert) {
-            QMetaObject::invokeMethod(this, [this, alert]() {
-                addAlert(alert);
-            });
-        };
-
         //  Conexión del callback: Sniffer → MainWindow
         if (sniffer) {
             sniffer->onPacketCaptured = [this](const Packet& pkt) {
@@ -270,8 +276,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
                 // siempre desde el hilo principal de Qt.
                 QMetaObject::invokeMethod(this, [this, pkt]() {
                     packetList.push_back(pkt);
-                    
-                    detector.analyze(pkt);
 
                     // Filtro visual: si pasa, añadirlo directamente a la tabla
                     std::string fSrcIp   = filterSrcIp->text().toStdString();
@@ -377,6 +381,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
         updateStatusBar();
     });
 
+    // Visual Filters
     auto applySlot = [this]() { applyFilters(); };
     connect(filterSrcIp,    &QLineEdit::textChanged,          this, applySlot);
     connect(filterDstIp,    &QLineEdit::textChanged,          this, applySlot);
@@ -384,7 +389,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     connect(filterDstPort,  &QLineEdit::textChanged,          this, applySlot);
     connect(filterProtocol, &QComboBox::currentTextChanged,   this, applySlot);
 
-    // Click en fila → panel detalles OSI + visor Raw
     connect(table, &QTableWidget::cellClicked, this, [this](int row, int) {
         if (row < 0 || row >= static_cast<int>(displayedList.size())) return;
         const Packet& pkt = displayedList[row];
@@ -423,11 +427,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
         const auto& data = pkt.getRawData();
         if (data.empty()) {
             raw->setPlainText("(no hay datos raw disponibles)");
-
-        // Hexadecimal viewer
-        const auto& data = pkt.getRawData();
-        if (data.empty()) {
-            raw->setPlainText("(no raw data available)");
             return;
         }
 
@@ -439,15 +438,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
             hex += QString("%1  ").arg(static_cast<uint>(i), 4, 16, QChar('0')).toUpper();
 
             // Bytes en hex (16 por línea)
-            hex += QString("%1  ").arg(static_cast<uint>(i), 4, 16, QChar('0')).toUpper();
-
             for (size_t j = 0; j < 16; ++j) {
                 if (i + j < data.size())
                     hex += QString("%1 ").arg(data[i + j], 2, 16, QChar('0')).toUpper();
                 else
                     hex += "   ";
                 if (j == 7) hex += " "; // separador central
-                if (j == 7) hex += " ";
             }
 
             hex += "  ";
@@ -467,8 +463,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 }
 
 //  Destructor
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     if (sniffer) {
         sniffer->detener();
         delete sniffer;
@@ -508,6 +503,7 @@ void MainWindow::addAlert(const Alert& alert)
     updateStatusBar();
 }
 
+//  applyFilters
 void MainWindow::applyFilters()
 {
     std::string fSrcIp   = filterSrcIp->text().toStdString();
@@ -525,18 +521,19 @@ void MainWindow::applyFilters()
         if (!fDstIp.empty()   && pkt.getDstIp().find(fDstIp) == std::string::npos) match = false;
         if (!fSrcPort.empty() && std::to_string(pkt.getSrcPort()) != fSrcPort)      match = false;
         if (!fDstPort.empty() && std::to_string(pkt.getDstPort()) != fDstPort)      match = false;
-
-        if (fProto != "Todos" && pkt.getProtocol() != fProto)                         match = false;
+        if (fProto != "Todos" && pkt.getProtocol() != fProto)                       match = false;
 
         if (match) {
             displayedList.push_back(pkt);
             appendRow(pkt);
         }
     }
+
     updateTable();
     updateStatusBar();
 }
 
+//  appendRow — inserta una sola fila al final de la tabla
 void MainWindow::appendRow(const Packet& pkt)
 {
     int row = table->rowCount();
@@ -559,6 +556,7 @@ void MainWindow::appendRow(const Packet& pkt)
     colorRow(row, pkt.getProtocol());
 }
 
+//  updateTable
 void MainWindow::updateTable()
 {
     table->setRowCount(0);
@@ -567,15 +565,15 @@ void MainWindow::updateTable()
 }
 
 //  exportToCSV
-void MainWindow::exportToCSV() {
+void MainWindow::exportToCSV()
+{
     if (packetList.empty()) {
         QMessageBox::information(this, "Sin datos", "No hay paquetes capturados para exportar.");
         return;
-    } 
+    }
 
     QString docs = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     QString fileName = QFileDialog::getSaveFileName(this, "Guardar captura", docs + "/captura_paquetes.csv", "CSV (*.csv)");
-
     if (fileName.isEmpty()) return;
 
     std::ofstream outfile(fileName.toStdString());
@@ -584,13 +582,15 @@ void MainWindow::exportToCSV() {
         return;
     }
 
-    outfile << "ID,SRC_IP,DST_IP,TOS,TTL,LEN,PROTOCOL,"
-               "SRC_PORT,DST_PORT,ICMP_TYPE,ICMP_CODE,FLAGS\n";
-
+    outfile << "ID,SRC_IP,DST_IP,TOS,TTL,LEN,PROTOCOLO,"
+               "PUERTO_ORIGEN,PUERTO_DESTINO,ICMP_TYPE,ICMP_CODE,FLAGS\n";
     for (const auto& pkt : packetList)
         pkt.guardarPaquete(outfile);
 
-    QMessageBox::information(  this, "Exportación exitosa", QString("Se exportaron %1 paquetes a:\n%2").arg(packetList.size()).arg(fileName));
+    QMessageBox::information(
+        this, "Exportación exitosa",
+        QString("Se exportaron %1 paquetes a:\n%2")
+            .arg(packetList.size()).arg(fileName));
 }
 
 // import CSV
@@ -632,18 +632,20 @@ void MainWindow::importFromCSV() {
 }
 
 //  updateStatusBar
-void MainWindow::updateStatusBar()
-{
-    statusLabel->setText(QString("Total capturados: %1  •  Mostrando: %2").arg(packetList.size()).arg(displayedList.size()));
+void MainWindow::updateStatusBar() {
+    statusLabel->setText(
+        QString("Total capturados: %1  •  Mostrando: %2")
+            .arg(packetList.size())
+            .arg(displayedList.size()));
 }
 
-void MainWindow::colorRow(int row, const std::string& protocol)
-{
+//  colorRow — color de texto según protocolo
+void MainWindow::colorRow(int row, const std::string& protocol){
     QColor color;
-    if      (protocol == "TCP")  color = QColor(80,  170, 255);
-    else if (protocol == "UDP")  color = QColor(80,  220,  80);
-    else if (protocol == "ICMP") color = QColor(255, 170,  50);
-    else                         color = QColor(180, 180, 180);
+    if      (protocol == "TCP")  color = QColor(80,  170, 255);  // azul
+    else if (protocol == "UDP")  color = QColor(80,  220,  80);  // verde
+    else if (protocol == "ICMP") color = QColor(255, 170,  50);  // naranja
+    else                         color = QColor(180, 180, 180);  // gris
 
     for (int col = 0; col < table->columnCount(); ++col)
         if (QTableWidgetItem* it = table->item(row, col))
