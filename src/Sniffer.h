@@ -1,7 +1,6 @@
 #ifndef SNIFFER_H
 #define SNIFFER_H
 
-#include <iostream>
 #include <vector>
 #include <string>
 #include <functional>
@@ -188,6 +187,7 @@ private:
         // Enviar paquete a MainWindow via callback
         if (self->onPacketCaptured)
             self->onPacketCaptured(pkt);
+        pkt.mostrarPaquete();
         self->contador++;
     }
 };

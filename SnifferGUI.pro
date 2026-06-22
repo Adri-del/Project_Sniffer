@@ -9,9 +9,9 @@ SOURCES += \
 HEADERS += \
     src\Elige_Interfaz.h \
     src\HeaderStructures.h \
-    src\ThreatDetector.h \
     src\Packet.h \
     src\Sniffer.h \
+    src\ThreatDetector.h \
     src\mainwindow.h
 
 INCLUDEPATH += $$PWD/Sniffer-Installer/npcap-sdk/Include

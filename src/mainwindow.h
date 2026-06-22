@@ -1,9 +1,7 @@
-
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QListWidget>
 #include <QTableWidget>
 #include <QTextEdit>
 #include <QPushButton>
@@ -14,10 +12,8 @@
 
 #include "Sniffer.h"
 #include "Packet.h"
-#include "ThreatDetector.h"
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -26,7 +22,6 @@ public:
 
 private:
     Sniffer* sniffer = nullptr;
-    ThreatDetector detector;
     bool importado = false;
 
     // Tabla principal
@@ -35,11 +30,6 @@ private:
     // Paneles inferiores
     QTextEdit* details;   // Analisis por capas OSI
     QTextEdit* raw;       // Visor hexadecimal
-    
-    QListWidget* alertList;       // list of alerts
-    QLabel*      alertBadge;      // red counter in the tab
-    QPushButton* btnClearAlerts;  // clear alerts
-    int          alertCount = 0;
 
     // Buttons
     QPushButton* btnStart;
@@ -73,7 +63,6 @@ private:
     void updateStatusBar();
     void colorRow(int row, const std::string& protocol);
     void appendRow(const Packet& pkt);
-    void addAlert(const Alert& alert);
 };
 
 #endif
